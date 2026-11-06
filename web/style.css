@@ -96,7 +96,7 @@ main{min-height:100svh;padding:0;display:grid;place-items:center}.workspace{posi
 /* Keep the circular information screens compact without scrolling. */
 .device-panel{max-height:none;overflow:visible}
 #bluetooth-view{width:76%}#bluetooth-view h2{font-size:16px;line-height:1.1;margin:0 0 3px}#bluetooth-view p{font-size:12px;line-height:1.2;margin:2px 0}#bluetooth-view label:not(.show-all){font-size:12px;line-height:1.1;margin:4px 0 3px}#bluetooth-view select{height:32px;min-height:32px;padding:3px 6px;font-size:13px}#bluetooth-view .show-all{min-height:22px;margin:3px 0 0;font-size:11px;line-height:1.1}#bluetooth-view .show-all input{width:16px;height:16px}
-.connect-icon{display:grid;place-items:center;width:44px;height:44px;margin:5px auto 0;border:1px solid #777;border-radius:50%;background:#272727;color:#fff}.connect-icon svg{width:22px;height:22px}.connect-icon:hover:not(:disabled){background:#383838}.disconnect-icon{margin:5px auto 0}
+.connect-button{min-height:44px;margin:5px auto 0;padding:0 20px;border:1px solid #777;border-radius:999px;background:#272727;color:#fff;font-size:14px;font-weight:600}.connect-button:hover:not(:disabled){background:#383838}.disconnect-icon{margin:5px auto 0}
 #bluetooth-view .dialog-status:empty{display:none}#bluetooth-view .dialog-status{font-size:11px;margin:2px 0}#bluetooth-view #unavailable p{font-size:11px}#bluetooth-view #unavailable .settings-action{min-height:28px;padding:3px;font-size:11px;margin:3px 0 0}
 
 /* An open device view keeps its control visibly selected. */
@@ -116,6 +116,7 @@ body{min-height:100svh;background-color:#000;background-image:radial-gradient(ci
 #bluetooth-view h2{margin:0 0 6px}#bluetooth-view p{margin:4px 0}#bluetooth-view .show-all{margin-top:6px;min-height:28px}#bluetooth-view #unavailable .settings-action{font-size:14px;min-height:34px}
 @media(max-width:360px){.device-status,.device-panel h2,#bluetooth-view h2,.device-overlay strong{font-size:16px}.device-context,.device-panel p,#bluetooth-view p,.device-panel .settings-status,.device-panel .settings-status strong,.device-panel .show-all,#bluetooth-view .show-all,#bluetooth-view .dialog-status,#bluetooth-view #unavailable p{font-size:13px}}
 
-/* Status feedback must not move the centered Bluetooth controls. */
-#bluetooth-view{position:relative}
-#bluetooth-view .dialog-status{position:absolute;top:100%;left:0;width:100%;margin:4px 0 0}
+/* Center the controls above a reserved area for feedback. */
+#bluetooth-view{width:68%;height:72%;display:flex;flex-direction:column;overflow:auto}
+.bluetooth-controls{flex:1 0 auto;display:flex;flex-direction:column;justify-content:center;align-items:center}
+#bluetooth-view .dialog-status{flex:0 1 auto;max-height:35%;overflow:auto;margin:4px 0 0}

@@ -1,6 +1,9 @@
 export const SERVICE='000001f0-0000-1000-8000-00805f9b34fb';
 export const WRITE='000001f1-0000-1000-8000-00805f9b34fb';
 export const NOTIFY='000001f2-0000-1000-8000-00805f9b34fb';
+export function connectionErrorMessage(error,deviceSelected){
+ return error.name==='NotFoundError'&&!deviceSelected?'No badge selected. Tap connect to try again.':'Couldn’t connect. Make sure your badge is in Bluetooth mode and try again.';
+}
 export async function requestBadge(bluetooth,onDevice=()=>{},{showAll=false,onNotification=()=>{}}={}){
  const options=showAll?{acceptAllDevices:true,optionalServices:[SERVICE]}:{filters:[{namePrefix:'E-badge'},{namePrefix:'E-Badge'}],optionalServices:[SERVICE]};
  const device=await bluetooth.requestDevice(options);

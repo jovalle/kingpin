@@ -28,3 +28,10 @@ test('subscribes to notifications and forwards their DataView',async()=>{
  await requestBadge({requestDevice:async()=>device},()=>{},{onNotification:value=>{received=value}});
  const data=new DataView(Uint8Array.of(1,2).buffer);handler({target:{value:data}});assert.equal(received,data);
 });
+
+test('connection errors explain cancellation and failures without browser jargon',async()=>{
+ const {connectionErrorMessage}=await import('../../web/bluetooth.js');
+ assert.equal(connectionErrorMessage({name:'NotFoundError'},false),'No badge selected. Tap connect to try again.');
+ assert.equal(connectionErrorMessage({name:'NotFoundError'},true),'Couldn’t connect. Make sure your badge is in Bluetooth mode and try again.');
+ assert.equal(connectionErrorMessage({name:'NetworkError',message:'GATT error'},true),'Couldn’t connect. Make sure your badge is in Bluetooth mode and try again.');
+});

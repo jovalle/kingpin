@@ -7,7 +7,7 @@ import { slideshowFrame } from './slideshow.js';
 import { createStatusParser } from './status.js';
 import { clampOffset, previewPlacement } from './crop.js';
 import { packetize } from './protocol.js';
-import { requestBadge, sendPackets } from './bluetooth.js';
+import { requestBadge, sendPackets, connectionErrorMessage } from './bluetooth.js';
 
 const uploadIcon =
   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3m-4 4 4-4 4 4"/><path d="M5 14v4a3 3 0 0 0 3 3h8a3 3 0 0 0 3-3v-4"/></svg>';
@@ -15,7 +15,7 @@ const bluetoothIcon =
   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7l10 10-5 4V3l5 4L7 17"/></svg>';
 document.querySelector('#app').innerHTML = `
 
-<main><input id="file" type="file" accept="image/*,video/*" multiple hidden><div class="workspace"><button id="bluetooth-toggle" class="frame-control bluetooth-toggle" type="button" aria-label="Bluetooth settings" aria-controls="badge-settings" aria-expanded="false" title="Bluetooth settings">${bluetoothIcon}</button><button id="settings-toggle" class="frame-control settings-toggle" type="button" aria-label="Badge settings" aria-controls="badge-settings" aria-expanded="false" title="Badge settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h4m4 0h8M4 17h8m4 0h4"/><circle cx="10" cy="7" r="2"/><circle cx="14" cy="17" r="2"/></svg></button><aside id="badge-settings" class="badge-settings" aria-label="Badge information" hidden><div id="settings-view" class="device-panel"><h2>Ani-Pin</h2><div class="settings-status"><span>Status</span><strong id="settings-connection">Not connected</strong></div><div class="settings-status usage-label"><span>Usage</span><strong><span id="badge-used">Unknown</span> / <span id="badge-capacity">Unknown</span></strong></div><div id="usage-bar" class="usage-bar" role="progressbar" aria-label="Storage usage" aria-valuemin="0" aria-valuemax="100" aria-valuetext="Storage usage unknown"><span id="usage-fill"></span></div><p id="badge-storage-note">Connect to see usage.</p></div><div id="bluetooth-view" class="device-panel" hidden><h2>Bluetooth</h2><p id="bluetooth-status">Not connected</p><div id="available"><button id="search" class="connect-icon" aria-label="Connect badge" title="Connect badge">${bluetoothIcon}</button><label class="show-all"><input id="show-all" type="checkbox"> Show all nearby devices</label></div><div id="unavailable" hidden><p>Open in a Bluetooth-enabled browser.</p><input id="page-address" readonly hidden><button id="copy-address" class="settings-action">Copy page address</button><button id="copy-flag" class="settings-action">Copy browser flag</button></div><button id="disconnect" class="disconnect-icon" aria-label="Disconnect badge" title="Disconnect badge" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 3v9M6.4 6.4a8 8 0 1 0 11.2 0"/></svg></button><p id="connection-status" class="dialog-status" role="status" aria-live="polite"></p></div></aside>
+<main><input id="file" type="file" accept="image/*,video/*" multiple hidden><div class="workspace"><button id="bluetooth-toggle" class="frame-control bluetooth-toggle" type="button" aria-label="Bluetooth settings" aria-controls="badge-settings" aria-expanded="false" title="Bluetooth settings">${bluetoothIcon}</button><button id="settings-toggle" class="frame-control settings-toggle" type="button" aria-label="Badge settings" aria-controls="badge-settings" aria-expanded="false" title="Badge settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h4m4 0h8M4 17h8m4 0h4"/><circle cx="10" cy="7" r="2"/><circle cx="14" cy="17" r="2"/></svg></button><aside id="badge-settings" class="badge-settings" aria-label="Badge information" hidden><div id="settings-view" class="device-panel"><h2>Ani-Pin</h2><div class="settings-status"><span>Status</span><strong id="settings-connection">Not connected</strong></div><div class="settings-status usage-label"><span>Usage</span><strong><span id="badge-used">Unknown</span> / <span id="badge-capacity">Unknown</span></strong></div><div id="usage-bar" class="usage-bar" role="progressbar" aria-label="Storage usage" aria-valuemin="0" aria-valuemax="100" aria-valuetext="Storage usage unknown"><span id="usage-fill"></span></div><p id="badge-storage-note">Connect to see usage.</p></div><div id="bluetooth-view" class="device-panel" hidden><div class="bluetooth-controls"><h2>Bluetooth</h2><p id="bluetooth-status">Not connected</p><div id="available"><button id="search" class="connect-button" type="button">Connect</button><label class="show-all"><input id="show-all" type="checkbox"> Show all nearby devices</label></div><div id="unavailable" hidden><p>Open in a Bluetooth-enabled browser.</p><input id="page-address" readonly hidden><button id="copy-address" class="settings-action">Copy page address</button><button id="copy-flag" class="settings-action">Copy browser flag</button></div><button id="disconnect" class="disconnect-icon" aria-label="Disconnect badge" title="Disconnect badge" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 3v9M6.4 6.4a8 8 0 1 0 11.2 0"/></svg></button></div><p id="connection-status" class="dialog-status" role="status" aria-live="polite"></p></div></aside>
 <section id="upload-view" class="upload-view workspace-card"><div class="device-frame"><div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="Connect badge"><span class="device-status" id="device-status" role="status" aria-live="polite">Not connected</span><span class="device-context" id="device-context">Tap to connect</span></div></div><div class="empty-details"><p>Zoom and position your image before sending it to your badge.</p><button type="button" id="browse-files" class="outline-button">Browse files</button><span class="browse-hint">Images, GIFs, videos, or multiple still images</span></div><p id="upload-error" class="status error" role="alert"></p></section>
 <section id="preview-view" class="preview-view workspace-card" hidden><div class="preview-stage"><div class="device-frame"><svg class="transfer-ring" viewBox="0 0 100 100" aria-hidden="true"><circle class="ring-track" cx="50" cy="50" r="47"/><circle id="ring-value" cx="50" cy="50" r="47" pathLength="100"/></svg><div class="transfer-readout" id="transfer-readout" aria-hidden="true" hidden></div><div class="device-overlay" id="device-overlay" hidden><span id="overlay-icon" aria-hidden="true">✓</span><strong id="overlay-title"></strong><span id="overlay-detail"></span></div><div class="badge-screen" id="crop-preview" tabindex="0" role="group" aria-label="Reposition image" aria-describedby="crop-help"><img draggable="false" id="preview-image" alt="Selected image on badge" hidden><img draggable="false" id="preview-next" alt="" aria-hidden="true" hidden><video id="preview-video" aria-label="Selected video on badge" muted playsinline loop hidden></video></div></div><details class="slideshow-label" id="slideshow-label" hidden><summary>Animation frames</summary><div id="slide-list"></div></details><div class="crop-controls"><div class="file-line"><span id="filedetails"></span><button class="text-button" id="change">Replace</button></div><div class="crop-row"><label for="zoom">Zoom</label><input id="zoom" type="range" min="1" max="2" step="0.01" value="1"><output id="zoom-value" for="zoom">100%</output><button type="button" class="crop-reset" id="crop-reset" aria-label="Reset image position and zoom" title="Reset image position and zoom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></button></div><p class="crop-note" id="crop-help">Drag or use arrow keys to position</p></div></div><button id="send" class="primary transfer-action">Connect badge</button><div class="transfer-feedback"><div class="progress" id="progress-wrap" role="progressbar" aria-label="Transfer progress" aria-valuemin="0" aria-valuemax="100" hidden><div id="progress-bar"></div></div><p id="status" class="status" role="status" aria-live="polite"></p></div></section>
 </div></main>
@@ -89,15 +89,11 @@ function setStatus(message, error = false) {
 }
 function setConnectionStatus(message, error = false) {
   const el = $('#connection-status');
-  el.textContent = error ? 'Connection failed. Try again.' : message;
-  el.title = error ? message : '';
+  el.textContent = message;
   el.classList.toggle('error', error);
   if (error) {
-    const noSelection = message.startsWith('No device selected');
-    $('#device-status').textContent = noSelection ? 'No badge selected' : 'Couldn’t connect';
-    $('#device-context').textContent = noSelection
-      ? 'Tap to search again'
-      : 'Check Bluetooth, then tap to retry';
+    $('#device-status').textContent = 'Couldn’t connect';
+    $('#device-context').textContent = 'Check Bluetooth, then tap to retry';
   }
 }
 function supported() {
@@ -177,7 +173,7 @@ function state() {
   $('#send').disabled = busy && cancelled;
   $('#send').classList.toggle('is-cancel', busy);
   $('#search').disabled = connecting || busy;
-  $('#search').setAttribute('aria-label', connecting ? 'Connecting…' : 'Connect badge');
+  $('#search').textContent = connecting ? 'Connecting…' : 'Connect';
   $('#available').hidden = connected || !supported();
   $('#unavailable').hidden = connected || supported();
   $('#disconnect').hidden = !connected;
@@ -348,17 +344,15 @@ $('#search').addEventListener('click', async () => {
       }
     }, 1400);
   } catch (e) {
+    const message = connectionErrorMessage(e, !!device);
     pendingFiles = null;
     if (device?.gatt?.connected) device.gatt.disconnect();
     device = null;
     write = null;
     storageStats = null;
     renderStorage();
-    const message =
-      e.name === 'NotFoundError'
-        ? 'No device selected. Press the badge’s Bluetooth button and search again.'
-        : `Could not connect: ${e.message}. Make sure the badge is in Bluetooth mode and disconnected from your phone.`;
     setConnectionStatus(message, true);
+    openSettings('bluetooth');
   } finally {
     connecting = false;
     if (!showSuccess) state();
