@@ -1,0 +1,9 @@
+## 1.0.0 (2026-11-06)
+
+### Features
+
+* add browser-based Ani-Pin editor ([c9e7d2a](https://github.com/jovalle/kingpin/commit/c9e7d2a0d45d00006da93cff895b18b22f4bd872))
+
+### Bug Fixes
+
+* update kingpin logo badge image ([38996dc](https://github.com/jovalle/kingpin/commit/38996dc391266785fc8924c38435f8ea2f476983))
