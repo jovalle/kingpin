@@ -1,3 +1,9 @@
+## [1.2.0](https://github.com/jovalle/kingpin/compare/v1.1.0...v1.2.0) (2026-11-06)
+
+### Features
+
+* add crown logo and favicon ([91232f9](https://github.com/jovalle/kingpin/commit/91232f9910e20f24935818dc865e490c1ca63d03))
+
 ## [1.1.0](https://github.com/jovalle/kingpin/compare/v1.0.0...v1.1.0) (2026-11-06)
 
 ### Features
