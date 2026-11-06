@@ -1,3 +1,9 @@
+## [1.1.0](https://github.com/jovalle/kingpin/compare/v1.0.0...v1.1.0) (2026-11-06)
+
+### Features
+
+* add justfile for quick local server ([d024be3](https://github.com/jovalle/kingpin/commit/d024be367b6f09ec0bf16a26665faf9bf71e0d87))
+
 ## 1.0.0 (2026-11-06)
 
 ### Features
