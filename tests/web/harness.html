@@ -1,0 +1,37 @@
+<!doctype html><html><head><title>Kingpin media checks</title></head><body><pre id="results">Running…</pre><script type="module">
+import {prepare,prepareSlideshow} from '/web/media.js';
+const output=document.querySelector('#results');
+try{
+ const gif=await (await fetch('/faces/cloud-navigator.gif')).blob();
+ const g=await prepare(new File([gif],'test.gif',{type:'image/gif'}));
+ const png=await (await fetch('/assets/faces/helm-happy.png')).blob();
+ const p=await prepare(new File([png],'test.png',{type:'image/png'}));
+ const mp4=await (await fetch('/tests/web/sample.mp4')).blob();
+ const v=await prepare(new File([mp4],'test.mp4',{type:'video/mp4'}));
+ if(g.kind!==5 || g.frameCount!==24 || p.kind!==6 || p.frameCount!==1 || v.kind!==5 || v.frameCount!==5)throw Error('Unexpected conversion output');
+ const marker=document.createElement('canvas');marker.width=368;marker.height=368;const m=marker.getContext('2d');m.fillStyle='white';m.fillRect(0,0,368,368);m.fillStyle='red';m.fillRect(182,0,4,368);m.fillStyle='blue';m.fillRect(0,182,368,4);
+ const markerBlob=await new Promise(resolve=>marker.toBlob(resolve,'image/png'));
+ for(const zoom of [1,1.18]){
+  const encoded=await prepare(new File([markerBlob],'marker.png',{type:'image/png'}),zoom);
+  const decoded=await createImageBitmap(new Blob([encoded.message.slice(53,-1)],{type:'image/jpeg'}));
+  const rendered=document.createElement('canvas');rendered.width=368;rendered.height=368;const c=rendered.getContext('2d');c.drawImage(decoded,0,0);
+  const red=c.getImageData(180,50,1,1).data, blue=c.getImageData(50,180,1,1).data;
+  if(!(red[0]>180&&red[1]<100&&blue[2]>150&&blue[0]<100))throw Error(`Visible badge center is offset at ${zoom}×`);
+ }
+
+ const show=await prepareSlideshow([new File([markerBlob],'one.png',{type:'image/png'}),new File([markerBlob],'two.png',{type:'image/png'})]);
+ if(show.kind!==5||show.frameCount!==40)throw Error('Unexpected slideshow output');
+ const colorFile=async(color,name)=>{const c=document.createElement('canvas');c.width=c.height=40;const ctx=c.getContext('2d');ctx.fillStyle=color;ctx.fillRect(0,0,40,40);return new File([await new Promise(resolve=>c.toBlob(resolve,'image/png'))],name,{type:'image/png'})};
+ const colors=await prepareSlideshow([await colorFile('red','red.png'),await colorFile('blue','blue.png')]);
+ const prefix=new TextEncoder().encode('{"type":5,"data":').length, view=new DataView(colors.message.buffer,colors.message.byteOffset+prefix);
+ async function pixel(frame){const offset=view.getUint32(32+16*frame+12,true);const start=view.getUint32(offset+16,true),length=view.getUint32(offset+20,true);const bitmap=await createImageBitmap(new Blob([colors.message.slice(prefix+start,prefix+start+length)],{type:'image/jpeg'}));const c=document.createElement('canvas');c.width=c.height=368;const ctx=c.getContext('2d');ctx.drawImage(bitmap,0,0);return ctx.getImageData(180,180,1,1).data}
+ const red=await pixel(0),mixed=await pixel(17),blue=await pixel(20);
+ if(!(red[0]>200&&red[2]<50&&mixed[0]>50&&mixed[2]>50&&blue[2]>200&&blue[0]<50))throw Error('Slideshow colors or crossfade are incorrect');
+ const moved=await prepare(new File([markerBlob],'marker.png',{type:'image/png'}),2,()=>{},{x:.25,y:-.25});
+ const movedBitmap=await createImageBitmap(new Blob([moved.message.slice(53,-1)],{type:'image/jpeg'}));
+ const movedCanvas=document.createElement('canvas');movedCanvas.width=368;movedCanvas.height=368;const movedCtx=movedCanvas.getContext('2d');movedCtx.drawImage(movedBitmap,0,0);
+ const movedRed=movedCtx.getImageData(270,50,1,1).data, movedBlue=movedCtx.getImageData(50,90,1,1).data;
+ if(!(movedRed[0]>180&&movedRed[1]<100&&movedBlue[2]>150&&movedBlue[0]<100))throw Error('Moved crop did not match requested position');
+ output.textContent=`PASS GIF ${g.frameCount} frames; PNG ${p.frameCount} frame; video ${v.frameCount} frames; crop centered at 100% and 118%, moved crop matches; slideshow crossfade verified`;
+}catch(e){output.textContent='FAIL '+e.stack}
+</script></body></html>

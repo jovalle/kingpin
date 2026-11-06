@@ -1,0 +1,26 @@
+# Dependencies and builds
+node_modules/
+dist/
+
+# Python environments and caches
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Local configuration and editor files
+.env
+.env.*
+!.env.example
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Local face previews
+assets/faces/*.gif
+assets/faces/preview.png
