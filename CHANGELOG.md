@@ -1,3 +1,10 @@
+## [1.3.0](https://github.com/jovalle/kingpin/compare/v1.2.0...v1.3.0) (2026-11-10)
+
+### Features
+
+* add fun faces ([a9a3d28](https://github.com/jovalle/kingpin/commit/a9a3d285f3ea8aefa820b9e1b5512064c452791a))
+* set favicon ([c0a53af](https://github.com/jovalle/kingpin/commit/c0a53afc40555d29f55f3b72f73b119139f4f197))
+
 ## [1.2.0](https://github.com/jovalle/kingpin/compare/v1.1.0...v1.2.0) (2026-11-06)
 
 ### Features
